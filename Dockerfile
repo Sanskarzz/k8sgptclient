@@ -9,5 +9,4 @@ FROM alpine:3.19
 RUN apk --no-cache add ca-certificates
 WORKDIR /app
 COPY --from=builder /app/k8sgptclient .
-EXPOSE 8181
 ENTRYPOINT ["./k8sgptclient"]

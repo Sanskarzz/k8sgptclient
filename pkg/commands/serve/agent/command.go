@@ -1,4 +1,4 @@
-package server
+package agent
 
 import (
 	"context"
@@ -16,8 +16,8 @@ func Command() *cobra.Command {
 	var httpAddress string
 	var kubeConfigOverrides clientcmd.ConfigOverrides
 	command := &cobra.Command{
-		Use:   "server",
-		Short: "Start k8sgptclient Server",
+		Use:   "agent",
+		Short: "Start k8sgptclient Serve Agent",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// setup signals aware context
 			return signals.Do(context.Background(), func(ctx context.Context) error {

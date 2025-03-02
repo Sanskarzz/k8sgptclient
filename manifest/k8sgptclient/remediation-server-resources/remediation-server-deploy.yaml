@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: k8sgptclient
+  name: remediation-server
   namespace: k8sgptclient
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: k8sgptclient
+      app: remediation-server
   template:
     metadata:
       labels:
-        app: k8sgptclient
+        app: remediation-server
     spec:
-      serviceAccountName: k8sgptclient
+      serviceAccountName: remediation-server
       containers:
       - name: k8sgptclient
         image: sanskardevops/k8sgptclient:latest
         command: ["./k8sgptclient"]
-        args: ["serve", "server", "--http-address=:8081"]
+        args: ["serve", "remediation-server", "--http-address=:9000"]
         ports:
-        - containerPort: 8081
+        - containerPort: 9000
         resources:
           requests:
             memory: "64Mi"
