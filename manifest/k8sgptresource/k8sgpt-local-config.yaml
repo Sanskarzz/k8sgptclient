@@ -19,9 +19,9 @@ spec:
   filters:
     - Deployment
     - Pod
-  # sink:
-  #   type: slack
-  #   webhook: <webhook-url>
-  # extraOptions:
-  #   backstage:
-  #     enabled: true
+  sink:
+    type: webhook
+    webhook: http://remediation-server.k8sgptclient.svc.cluster.local:9090/webhook
+  extraOptions:
+    backstage:
+      enabled: true

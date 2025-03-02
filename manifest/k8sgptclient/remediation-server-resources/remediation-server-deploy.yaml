@@ -18,9 +18,9 @@ spec:
       - name: k8sgptclient
         image: sanskardevops/k8sgptclient:latest
         command: ["./k8sgptclient"]
-        args: ["serve", "remediation-server", "--http-address=:9000"]
+        args: ["serve", "remediation-server", "--http-address=:9090"]
         ports:
-        - containerPort: 9000
+        - containerPort: 9090
         resources:
           requests:
             memory: "64Mi"
