@@ -1,0 +1,5 @@
+resources:
+  - k8s-agent-deploy.yaml
+  - rbac.yaml
+  - service.yaml
+  - namespace.yaml

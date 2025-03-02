@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8sgptclient
+  namespace: k8sgptclient
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8sgptclient
+  template:
+    metadata:
+      labels:
+        app: k8sgptclient
+    spec:
+      serviceAccountName: k8sgptclient
+      containers:
+      - name: k8sgptclient
+        image: sanskardevops/k8sgptclient:latest
+        command: ["./k8sgptclient"]
+        args: ["serve", "server", "--http-address=:8081"]
+        ports:
+        - containerPort: 8081
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
