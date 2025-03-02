@@ -9,12 +9,18 @@ import (
 
 	"go.uber.org/multierr"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 func RunHttp(ctx context.Context, server *http.Server, certFile, keyFile string) error {
+	logger := log.FromContext(ctx).WithName("http-server").
+		WithValues("address", server.Addr)
+
 	defer fmt.Println("HTTP Server stopped")
+
 	// track shutdown error
 	var shutdownErr error
+
 	// track serve error
 	serveErr := func(ctx context.Context) error {
 		// create a wait group
@@ -34,11 +40,19 @@ func RunHttp(ctx context.Context, server *http.Server, certFile, keyFile string)
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			// gracefully shutdown server
-			shutdownErr = server.Shutdown(ctx)
+			if err := server.Shutdown(ctx); err != nil {
+				logger.Error(err, "Error during server shutdown")
+				shutdownErr = err
+			}
 		})
 		serve := func() error {
-			fmt.Printf("HTTP Server starting at %s...\n", server.Addr)
+			logger.Info("HTTP Server starting")
+
 			if certFile != "" && keyFile != "" {
+				logger.Info("Starting HTTPS server",
+					"certFile", certFile,
+					"keyFile", keyFile,
+				)
 				// server over https
 				return server.ListenAndServeTLS(certFile, keyFile)
 			} else {
@@ -53,5 +67,11 @@ func RunHttp(ctx context.Context, server *http.Server, certFile, keyFile string)
 		return nil
 	}(ctx)
 	// return error if any
-	return multierr.Combine(serveErr, shutdownErr)
+	if err := multierr.Combine(serveErr, shutdownErr); err != nil {
+		logger.Error(err, "Server stopped with errors")
+		return err
+	}
+
+	logger.Info("Server stopped gracefully")
+	return nil
 }

@@ -7,37 +7,62 @@ import (
 	"github.com/Sanskarzz/k8sgptclient/pkg/server"
 	"github.com/Sanskarzz/k8sgptclient/pkg/server/handlers"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 func NewServer(addr string, mgr ctrl.Manager) server.ServerFunc {
 	return func(ctx context.Context) error {
+		logger := log.FromContext(ctx).WithName("probes")
+
 		// create mux
+		logger.Info("Creating new server mux")
 		mux := http.NewServeMux()
+
 		// register health check that verifies manager health
+		logger.Info("Registering health check endpoint", "path", "/livez")
 		mux.Handle("GET /livez", handlers.Healthy(func() bool {
-			// Check if manager is healthy
-			return mgr.GetCache().WaitForCacheSync(ctx)
+			healthy := mgr.GetCache().WaitForCacheSync(ctx)
+			logger.V(1).Info("Health check executed",
+				"endpoint", "/livez",
+				"status", healthy,
+			)
+			return healthy
 		}))
+
 		// register ready check
+		logger.Info("Registering readiness check endpoint", "path", "/readyz")
 		mux.Handle("GET /readyz", handlers.Ready(func() bool {
-			// Check if manager is ready
-			return mgr.GetCache().WaitForCacheSync(ctx)
+			ready := mgr.GetCache().WaitForCacheSync(ctx)
+			logger.V(1).Info("Readiness check executed",
+				"endpoint", "/readyz",
+				"status", ready,
+			)
+			return ready
 		}))
 
 		// API endpoints
 		// Accepts a YAML manifest and applies it to the cluster.
+		logger.Info("Registering apply endpoint", "path", "/apply")
 		mux.Handle("POST /apply", handlers.NewClientHandler(mgr.GetClient()).Apply())
+
 		// Lists all pods in a specified namespace.
+		logger.Info("Registering pods list endpoint", "path", "/pods")
 		mux.Handle("GET /pods", handlers.NewClientHandler(mgr.GetClient()).ListPods())
+
 		// Streams logs for a specific pod.
+		logger.Info("Registering pod logs endpoint", "path", "/pods/{namespace}/{podName}/logs")
 		mux.Handle("GET /pods/{namespace}/{podName}/logs", handlers.NewClientHandler(mgr.GetClient()).PodLogs())
+
 		// Returns the status of a specific pod. including readiness and liveness probe results.
+		logger.Info("Registering pod status endpoint", "path", "/pods/{namespace}/{podName}/status")
 		mux.Handle("GET /pods/{namespace}/{podName}/status", handlers.NewClientHandler(mgr.GetClient()).PodStatus())
+
 		// create server
 		s := &http.Server{
 			Addr:    addr,
 			Handler: mux,
 		}
+
 		// run server
 		return server.RunHttp(ctx, s, "", "")
 	}
