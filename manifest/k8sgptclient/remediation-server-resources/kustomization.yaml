@@ -1,0 +1,3 @@
+resources:
+  - remediation-server-deploy.yaml
+  - service.yaml

@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k8sgptclient-agent
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Sanskarzz/k8sgptclient.git  
+    targetRevision: HEAD
+    path: manifest/k8sgptclient/agent-resources
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: k8sgptclient
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
