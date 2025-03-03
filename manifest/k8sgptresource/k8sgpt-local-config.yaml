@@ -6,12 +6,11 @@ metadata:
 spec:
   ai:
     enabled: true
-    model: mistral
-    backend: localai  
-    baseUrl: http://172.17.0.1:11434
-    # secret:
-    #   name: k8sgpt-sample-secret
-    #   key: openai-api-key
+    model: gpt-4o-mini
+    backend: openai
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
     # anonymized: false
     # language: english
   noCache: false

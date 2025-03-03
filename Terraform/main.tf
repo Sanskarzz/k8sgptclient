@@ -1,6 +1,5 @@
 provider "aws" {
   region     = var.region # Set to ap-south-1 as specified
-
 }
 
 # Create VPC for EKS
@@ -8,31 +7,32 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"
 
-  name = "devops-assignment-vpc"
+  name = "${var.cluster_name}-vpc"
   cidr = "10.0.0.0/16"
 
-  azs             = ["ap-south-1a", "ap-south-1b", "ap-south-1c"]
+  azs             = ["${var.region}a", "${var.region}b", "${var.region}c"]
   private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
   public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 
   enable_nat_gateway   = true
   single_nat_gateway   = true
   enable_dns_hostnames = true
+  enable_dns_support   = true 
 
   public_subnet_tags = {
-    "kubernetes.io/cluster/devops-assignment-cluster" = "shared"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
     "kubernetes.io/role/elb"                          = "1"
   }
 
   private_subnet_tags = {
-    "kubernetes.io/cluster/devops-assignment-cluster" = "shared"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb"                 = "1"
   }
 }
 
 # IAM Role for EKS Cluster
 resource "aws_iam_role" "eks_cluster_role" {
-  name = "devops-assignment-cluster-role"
+  name = "${var.cluster_name}-cluster-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -55,7 +55,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
 
 # IAM Role for Node Group
 resource "aws_iam_role" "eks_node_role" {
-  name = "devops-assignment-node-role"
+  name = "${var.cluster_name}-node-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -88,7 +88,7 @@ resource "aws_iam_role_policy_attachment" "eks_container_registry_readonly" {
 
 # Create EKS Cluster
 resource "aws_eks_cluster" "main" {
-  name     = "scoutflo-assignment-cluster"
+  name     = "${var.cluster_name}-cluster"
   role_arn = aws_iam_role.eks_cluster_role.arn
   version  = "1.30" # Set to Kubernetes version 1.30 as specified
 
@@ -106,25 +106,33 @@ resource "aws_eks_cluster" "main" {
 # Create EKS Node Group with exactly 2 t2.micro instances (free tier)
 resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
-  node_group_name = "devops-assignment-node-group"
+  node_group_name = "${var.cluster_name}-node-group"
   node_role_arn   = aws_iam_role.eks_node_role.arn
   subnet_ids      = module.vpc.private_subnets
 
   scaling_config {
-    desired_size = 2 # Exactly 2 instances as specified
-    max_size     = 2
-    min_size     = 2
+    desired_size = var.node_group_desired_size 
+    max_size     = var.node_group_desired_size + 1
+    min_size     = var.node_group_desired_size
   }
 
-  instance_types = ["t2.micro"] # Changed to t2.micro for free tier
+  # Add capacity type
+  capacity_type = "ON_DEMAND"
+
+  # Increase disk size
+  disk_size = 30
+
+  # Add tags
+  tags = {
+    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+  }
+
+  instance_types = [var.node_group_instance_type] 
 
   # Optional: Add labels to your nodes
   labels = {
-    role = "devops-assignment"
+    role = "scoutflo-assignment"
   }
-
-  # Set disk size to minimum required
-  disk_size = 20
 
   depends_on = [
     aws_iam_role_policy_attachment.eks_worker_node_policy,
