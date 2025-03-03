@@ -13,18 +13,12 @@ spec:
       labels:
         app: remediation-server
     spec:
-      serviceAccountName: remediation-server
+      serviceAccountName: remediation-server 
       containers:
       - name: k8sgptclient
         image: sanskardevops/k8sgptclient:latest
         command: ["./k8sgptclient"]
-        args: ["serve", "remediation-server", "--http-address=:9090", "--k8s-agent-url=http://k8s-agent.k8sgptclient.svc.cluster.local:8080"]
+        args: ["serve", "remediation-server", "--http-address=:9090"]
         ports:
         - containerPort: 9090
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "100m"
-          limits:
-            memory: "128Mi"
-            cpu: "200m"
+        

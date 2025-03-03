@@ -3,12 +3,12 @@ kind: Pod
 metadata:
   creationTimestamp: null
   labels:
-    run: nginx1
-  name: nginx1
+    run: nginx
+  name: nginx
 spec:
   containers:
-  - image: nginx
-    name: nginx1
+  - image: ngin
+    name: nginx
     resources: {}
   dnsPolicy: ClusterFirst
   restartPolicy: Always

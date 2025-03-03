@@ -16,6 +16,6 @@ spec:
       exec:
         command:
         - cat
-        - /tmp/healthy
+        - /tmp/heal
       initialDelaySeconds: 5
       periodSeconds: 5

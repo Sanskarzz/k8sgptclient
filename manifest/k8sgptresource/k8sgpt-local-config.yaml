@@ -11,16 +11,14 @@ spec:
     secret:
       name: k8sgpt-sample-secret
       key: openai-api-key
-    # anonymized: false
-    # language: english
-  noCache: false
-  version: v0.3.41
+    backOff:
+      enabled: false  
+    anonymized: false
+    language: english
+  noCache: true
+  version: v0.3.50
   filters:
     - Deployment
     - Pod
-  sink:
-    type: webhook
-    webhook: http://remediation-server.k8sgptclient.svc.cluster.local:9090/webhook
-  extraOptions:
-    backstage:
-      enabled: true
+    - ReplicaSet
+  

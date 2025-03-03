@@ -11,6 +11,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 
 func Command() *cobra.Command {
@@ -50,6 +51,9 @@ func Command() *cobra.Command {
 					mgr, err := ctrl.NewManager(config, ctrl.Options{
 						Scheme: nil, // we'll use the default scheme
 						Logger: logger.WithName("manager"),
+						Metrics: server.Options{
+							BindAddress: ":8081", // Change the metrics server port
+						},
 					})
 					if err != nil {
 						logger.Error(err, "Failed to create manager")
