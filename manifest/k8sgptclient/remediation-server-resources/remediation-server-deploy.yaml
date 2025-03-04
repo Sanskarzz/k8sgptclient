@@ -18,7 +18,23 @@ spec:
       - name: k8sgptclient
         image: sanskardevops/k8sgptclient:latest
         command: ["./k8sgptclient"]
-        args: ["serve", "remediation-server", "--http-address=:9090"]
+        args: 
+        - "serve"
+        - "remediation-server"
+        - "--http-address=:9090"
+        - "--model=o3-mini"
+        - "--backend=openai"
+        - "--explain=false"
+        - "--no-cache=true"
+        - "--password=$OPENAI_API_KEY"
+        - "--filters=Deployment,Pod"
+        - "--agent-url=http://k8s-agent.k8sgptclient.svc.cluster.local:8080"
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: k8sgpt-sample-secret
+              key: openai-api-key
         ports:
         - containerPort: 9090
         
