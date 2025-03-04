@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k8sgpt-config
+  namespace: k8sgptclient
+data:
+  k8sgpt.yaml: |
+    ai:
+      providers:
+        - name: openai
+          model: gpt-4o-mini
+          password: 
+          temperature: 0.7
+          topp: 0.5
+          topk: 50
+          maxtokens: 2048
+          customheaders: []
+      defaultprovider: openai
+    commit: unknown
+    date: unknown
+    kubeconfig: ""
+    kubecontext: ""
+    version: 0.3.50

@@ -3,3 +3,4 @@ resources:
   - service.yaml
   - rbac.yaml
   - namespace.yaml
+  - configmap.yaml

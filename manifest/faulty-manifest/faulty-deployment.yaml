@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: faulty-deployment
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: faulty-app

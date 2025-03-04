@@ -3,7 +3,11 @@ module github.com/Sanskarzz/k8sgptclient
 go 1.23.4
 
 require (
+	github.com/fatih/color v1.18.0
+	github.com/google/gnostic v0.7.0
 	github.com/k8sgpt-ai/k8sgpt v0.3.50
+	github.com/sashabaranov/go-openai v1.36.0
+	github.com/schollz/progressbar/v3 v3.17.1
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.19.0
 	go.uber.org/multierr v1.11.0
@@ -16,8 +20,6 @@ require (
 require (
 	buf.build/gen/go/interplex-ai/schemas/grpc/go v1.5.1-20241117203254-a91193b62179.1 // indirect
 	buf.build/gen/go/interplex-ai/schemas/protocolbuffers/go v1.35.2-20241117203254-a91193b62179.1 // indirect
-	buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.5.1-20241118152629-1379a5a1889d.1 // indirect
-	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.35.2-20241118152629-1379a5a1889d.1 // indirect
 	cel.dev/expr v0.18.0 // indirect
 	cloud.google.com/go v0.116.0 // indirect
 	cloud.google.com/go/ai v0.8.0 // indirect
@@ -104,7 +106,6 @@ require (
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/exponent-io/jsonpath v0.0.0-20210407135951-1de76d718b3f // indirect
 	github.com/expr-lang/expr v1.16.9 // indirect
-	github.com/fatih/color v1.18.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
@@ -128,7 +129,6 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/generative-ai-go v0.19.0 // indirect
-	github.com/google/gnostic v0.7.0 // indirect
 	github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-containerregistry v0.19.2 // indirect
@@ -230,8 +230,6 @@ require (
 	github.com/sagikazarmark/locafero v0.6.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/samber/lo v1.39.0 // indirect
-	github.com/sashabaranov/go-openai v1.36.0 // indirect
-	github.com/schollz/progressbar/v3 v3.17.1 // indirect
 	github.com/segmentio/fasthash v1.0.3 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
