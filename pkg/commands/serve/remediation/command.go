@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Sanskarzz/k8sgptclient/pkg/ai"
+	"github.com/Sanskarzz/k8sgptclient/pkg/gptscript"
 	"github.com/fatih/color"
 	openapi_v2 "github.com/google/gnostic/openapiv2"
 	"github.com/k8sgpt-ai/k8sgpt/pkg/analyzer"
@@ -26,6 +27,7 @@ import (
 type RemediationServer struct {
 	analyzer *Analysis
 	agentURL string
+	apiKey   string
 }
 
 type Analysis struct {
@@ -357,53 +359,56 @@ func (a *Analysis) Close() {
 }
 
 func (s *RemediationServer) runAnalysis() {
-	ticker := time.NewTicker(1 * time.Minute)
-	defer ticker.Stop()
+	log.Println("Starting k8sgpt analysis...")
 
-	// Use a for range loop to iterate over the ticker's channel
-	for range ticker.C {
-		log.Println("Starting k8sgpt analysis...")
+	// Run the analysis
+	s.analyzer.RunAnalysis()
 
-		// Run the analysis
-		s.analyzer.RunAnalysis()
+	if len(s.analyzer.Errors) > 0 {
+		log.Printf("Errors during analysis: %v", s.analyzer.Errors)
+	}
 
-		if len(s.analyzer.Errors) > 0 {
-			log.Printf("Errors during analysis: %v", s.analyzer.Errors)
+	if s.analyzer.Explain {
+		if err := s.analyzer.GetAIResults("text", false); err != nil {
+			log.Printf("Error getting AI results: %v", err)
+		}
+	}
+
+	// Initialize remediation generator
+	remediator, err := gptscript.NewRemediationGenerator(s.apiKey, s.agentURL)
+	if err != nil {
+		log.Printf("Failed to initialize remediation generator: %v", err)
+	}
+	defer remediator.Close()
+
+	// Process results
+	for _, result := range s.analyzer.Results {
+		log.Printf("\nFound issue in resource:\n"+
+			"Kind: %s\n"+
+			"Name: %s\n"+
+			"Parent: %s\n",
+			result.Kind,
+			result.Name,
+			result.ParentObject,
+		)
+
+		// Print each error and its details
+		for _, failure := range result.Error {
+			log.Printf("\nError: %s\n", failure.Text)
+		}
+
+		if result.Details != "" {
+			log.Printf("\nAnalysis Details: %s\n", result.Details)
+		}
+
+		// Generate remediation YAML
+		remediationYAML, err := remediator.GenerateRemediation(context.Background(), result)
+		if err != nil {
+			log.Printf("Failed to generate remediation: %v", err)
 			continue
 		}
 
-		if s.analyzer.Explain {
-			if err := s.analyzer.GetAIResults("text", false); err != nil {
-				log.Printf("Error getting AI results: %v", err)
-				continue
-			}
-		}
-
-		// Process results
-		for _, result := range s.analyzer.Results {
-			log.Printf("\nFound issue in resource:\n"+
-				"Kind: %s\n"+
-				"Name: %s\n"+
-				"Parent: %s\n",
-				result.Kind,
-				result.Name,
-				result.ParentObject,
-			)
-
-			// Print each error and its details
-			for _, failure := range result.Error {
-				log.Printf("Error: %s\n", failure.Text)
-			}
-
-			if result.Details != "" {
-				log.Printf("Analysis Details: %s\n", result.Details)
-			}
-
-			// TODO: Generate remediation YAML using GPTScript
-			// TODO: Send to k8s-agent at s.agentURL
-		}
-
-		// Optional: Print analysis stats if enabled
+		log.Printf("Generated remediation YAML:\n%s\n", remediationYAML)
 	}
 }
 
@@ -427,55 +432,53 @@ func Command() *cobra.Command {
 		configFile     string
 	)
 
-	// Declare configAI variable
-	// var configAI AIConfig
-
 	command := &cobra.Command{
 		Use:   "remediation-server",
 		Short: "Run k8sgptclient remediation-server",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			// Set up viper to use the config file
-			viper.SetConfigFile(configFile)
-			if err := viper.ReadInConfig(); err != nil {
-				return fmt.Errorf("failed to read config file: %v", err)
-			}
-
-			// Initialize analyzer with all parameters
-			analysis, err := NewAnalysis(
-				backend,
-				language,
-				filters,
-				namespace,
-				labelSelector,
-				noCache,
-				explain,
-				maxConcurrency,
-				withDoc,
-				false,      // Interactive mode always false for server
-				[]string{}, // No custom HTTP headers
-				withStats,
-				configFile,
-			)
-			if err != nil {
-				return err
-			}
-
-			server := &RemediationServer{
-				analyzer: analysis,
-				agentURL: agentURL,
-			}
-
-			// Start analysis in background
-			go server.runAnalysis()
+			ticker := time.NewTicker(1 * time.Minute)
+			defer ticker.Stop()
 
 			log.Printf("Starting remediation server on %s", httpAddress)
 			log.Printf("K8s agent URL: %s", agentURL)
-			log.Printf("Analysis configuration:")
-			log.Printf("- Backend: %s", backend)
-			log.Printf("- Filters: %v", filters)
-			log.Printf("- Namespace: %s", namespace)
-			log.Printf("- Explain mode: %v", explain)
+
+			for range ticker.C {
+				// Set up viper to use the config file
+				viper.SetConfigFile(configFile)
+				if err := viper.ReadInConfig(); err != nil {
+					return fmt.Errorf("failed to read config file: %v", err)
+				}
+
+				// Initialize analyzer with all parameters
+				analysis, err := NewAnalysis(
+					backend,
+					language,
+					filters,
+					namespace,
+					labelSelector,
+					noCache,
+					explain,
+					maxConcurrency,
+					withDoc,
+					false,      // Interactive mode always false for server
+					[]string{}, // No custom HTTP headers
+					withStats,
+					configFile,
+				)
+				if err != nil {
+					return err
+				}
+
+				server := &RemediationServer{
+					analyzer: analysis,
+					agentURL: agentURL,
+					apiKey:   apiKey,
+				}
+
+				// Start analysis in background
+				go server.runAnalysis()
+			}
 
 			return http.ListenAndServe(httpAddress, nil)
 		},
