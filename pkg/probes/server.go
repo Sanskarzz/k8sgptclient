@@ -58,9 +58,12 @@ func NewServer(addr string, mgr ctrl.Manager) server.ServerFunc {
 		mux.Handle("GET /pods/{namespace}/{podName}/status", handlers.NewClientHandler(mgr.GetClient()).PodStatus())
 
 		// Get specific deployment yaml
-		logger.Info("Registering deployment yaml endpoint", "path", "/deployments/{namespace}/{deploymentName}/yaml")
-		mux.Handle("GET /deployments/{namespace}/{deploymentName}/yaml", handlers.NewClientHandler(mgr.GetClient()).DeploymentYaml())
+		logger.Info("Registering deployment json endpoint", "path", "/deployment/{namespace}/{deploymentName}/yaml")
+		mux.Handle("GET /deployment/{namespace}/{deploymentName}/yaml", handlers.NewClientHandler(mgr.GetClient()).DeploymentYaml())
 
+		// Get specific pod yaml
+		logger.Info("Registering pod json endpoint", "path", "/pod/{namespace}/{podName}/yaml")
+		mux.Handle("GET /pod/{namespace}/{podName}/yaml", handlers.NewClientHandler(mgr.GetClient()).PodYaml())
 		// create server
 		s := &http.Server{
 			Addr:    addr,

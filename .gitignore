@@ -4,3 +4,8 @@
 *.tfstate.*
 terraform.tfvars
 .terraform.lock.hcl
+
+# Kubernetes files
+manifest/k8sgptclient/remediation-server-resources/configmap.yaml
+
+k8sgptclient
