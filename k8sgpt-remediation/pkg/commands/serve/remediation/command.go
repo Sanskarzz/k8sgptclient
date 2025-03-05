@@ -396,13 +396,13 @@ func (s *RemediationServer) runAnalysis() {
 		}
 
 		// Generate remediation YAML
-		remediationYAML, err := s.remediator.GenerateRemediation(context.Background(), result)
+		_, err := s.remediator.GenerateRemediation(context.Background(), result)
 		if err != nil {
 			log.Printf("Failed to generate remediation: %v", err)
 			continue
 		}
 
-		log.Printf("Generated remediation YAML:\n%s\n", remediationYAML)
+		//log.Printf("Generated remediation YAML:\n%s\n", remediationYAML)
 		// Write remediation YAML to file
 
 	}
@@ -433,7 +433,7 @@ func Command() *cobra.Command {
 		Short: "Run k8sgptclient remediation-server",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			ticker := time.NewTicker(20 * time.Second)
+			ticker := time.NewTicker(1 * time.Minute)
 			defer ticker.Stop()
 
 			log.Printf("Starting remediation server on %s", httpAddress)
