@@ -1,6 +1,6 @@
 # k8sgptclient
 
-.K8sGPT Client is a Kubernetes tool uses k8s-agent and k8sgpt-remediation that combines the power of GPT with Kubernetes to automatically detect and remediate issues in your cluster.
+K8sGPT Client is a Kubernetes tool uses k8s-agent and k8sgpt-remediation that combines the power of GPT with Kubernetes to automatically detect and remediate issues in your cluster.
 
 ## Architecture
 
