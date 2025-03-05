@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/Sanskarzz/k8sgptclient/pkg/commands/root"
+	"github.com/Sanskarzz/k8sgptclient/k8s-agent/pkg/commands/root"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )

@@ -15,16 +15,24 @@ spec:
     spec:
       serviceAccountName: remediation-server 
       containers:
-      - name: k8sgptclient
-        image: sanskardevops/k8sgptclient:latest
-        command: ["./k8sgptclient"]
+      - name: k8sgpt-remediation
+        image: sanskardevops/k8sgpt-remediation:latest
+        command: ["/bin/sh", "-c"]
         args: 
-        - "serve"
-        - "remediation-server"
-        - "--config=/etc/k8sgpt/k8sgpt.yaml"
-        - "--agent-url=http://k8s-agent.k8sgptclient.svc.cluster.local:8080"
-        - "--backend=openai"
-        - "--explain=true" 
+        - >
+            exec ./k8sgpt-remediation serve remediation-server
+            --config=/etc/k8sgpt/k8sgpt.yaml
+            --agent-url=http://k8s-agent.k8sgptclient.svc.cluster.local:8080
+            --backend=openai
+            --explain=true
+            --api-key=${API_KEY}
+            --no-cache=true
+        env:
+          - name: API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: k8sgpt-sample-secret
+                key: openai-api-key   
         volumeMounts:
         - name: k8sgpt-config
           mountPath: /etc/k8sgpt

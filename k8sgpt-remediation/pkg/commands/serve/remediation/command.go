@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Sanskarzz/k8sgptclient/pkg/ai"
-	"github.com/Sanskarzz/k8sgptclient/pkg/gptscript"
+	"github.com/Sanskarzz/k8sgptclient/k8sgpt-remediation/pkg/ai"
+	"github.com/Sanskarzz/k8sgptclient/k8sgpt-remediation/pkg/gptscript"
 	"github.com/fatih/color"
 	openapi_v2 "github.com/google/gnostic/openapiv2"
 	"github.com/k8sgpt-ai/k8sgpt/pkg/analyzer"
@@ -25,9 +25,10 @@ import (
 )
 
 type RemediationServer struct {
-	analyzer *Analysis
-	agentURL string
-	apiKey   string
+	analyzer   *Analysis
+	agentURL   string
+	apiKey     string
+	remediator *gptscript.RemediationGenerator
 }
 
 type Analysis struct {
@@ -374,13 +375,6 @@ func (s *RemediationServer) runAnalysis() {
 		}
 	}
 
-	// Initialize remediation generator
-	remediator, err := gptscript.NewRemediationGenerator(s.apiKey, s.agentURL)
-	if err != nil {
-		log.Printf("Failed to initialize remediation generator: %v", err)
-	}
-	defer remediator.Close()
-
 	// Process results
 	for _, result := range s.analyzer.Results {
 		log.Printf("\nFound issue in resource:\n"+
@@ -402,13 +396,15 @@ func (s *RemediationServer) runAnalysis() {
 		}
 
 		// Generate remediation YAML
-		remediationYAML, err := remediator.GenerateRemediation(context.Background(), result)
+		remediationYAML, err := s.remediator.GenerateRemediation(context.Background(), result)
 		if err != nil {
 			log.Printf("Failed to generate remediation: %v", err)
 			continue
 		}
 
 		log.Printf("Generated remediation YAML:\n%s\n", remediationYAML)
+		// Write remediation YAML to file
+
 	}
 }
 
@@ -437,11 +433,17 @@ func Command() *cobra.Command {
 		Short: "Run k8sgptclient remediation-server",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			ticker := time.NewTicker(1 * time.Minute)
+			ticker := time.NewTicker(20 * time.Second)
 			defer ticker.Stop()
 
 			log.Printf("Starting remediation server on %s", httpAddress)
 			log.Printf("K8s agent URL: %s", agentURL)
+			// Initialize remediation generator
+			remediator, err := gptscript.NewRemediationGenerator(apiKey, agentURL)
+			if err != nil {
+				log.Printf("Failed to initialize remediation generator: %v", err)
+			}
+			defer remediator.Close()
 
 			for range ticker.C {
 				// Set up viper to use the config file
@@ -471,9 +473,10 @@ func Command() *cobra.Command {
 				}
 
 				server := &RemediationServer{
-					analyzer: analysis,
-					agentURL: agentURL,
-					apiKey:   apiKey,
+					analyzer:   analysis,
+					agentURL:   agentURL,
+					apiKey:     apiKey,
+					remediator: remediator,
 				}
 
 				// Start analysis in background

@@ -9,7 +9,4 @@ spec:
   containers:
   - image: ngin
     name: nginx
-    resources: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
+    

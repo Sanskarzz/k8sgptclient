@@ -15,9 +15,9 @@ spec:
     spec:
       serviceAccountName: k8s-agent
       containers:
-      - name: k8sgptclient
-        image: sanskardevops/k8sgptclient:latest
-        command: ["./k8sgptclient"]
+      - name: k8s-agent
+        image: sanskardevops/k8s-agent:latest
+        command: ["./k8s-agent"]
         args: ["serve", "agent", "--http-address=:8080"]
         ports:
         - containerPort: 8080

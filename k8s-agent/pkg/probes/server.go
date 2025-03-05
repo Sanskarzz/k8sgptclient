@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Sanskarzz/k8sgptclient/pkg/server"
-	"github.com/Sanskarzz/k8sgptclient/pkg/server/handlers"
+	"github.com/Sanskarzz/k8sgptclient/k8s-agent/pkg/server"
+	"github.com/Sanskarzz/k8sgptclient/k8s-agent/pkg/server/handlers"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )

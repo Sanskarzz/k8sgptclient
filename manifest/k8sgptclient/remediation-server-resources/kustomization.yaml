@@ -2,5 +2,4 @@ resources:
   - remediation-server-deploy.yaml
   - service.yaml
   - rbac.yaml
-  - namespace.yaml
   - configmap.yaml

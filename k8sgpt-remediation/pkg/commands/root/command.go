@@ -1,7 +1,7 @@
 package root
 
 import (
-	"github.com/Sanskarzz/k8sgptclient/pkg/commands/serve"
+	"github.com/Sanskarzz/k8sgptclient/k8sgpt-remediation/pkg/commands/serve"
 	"github.com/spf13/cobra"
 )
 

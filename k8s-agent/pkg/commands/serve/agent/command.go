@@ -3,8 +3,8 @@ package agent
 import (
 	"context"
 
-	"github.com/Sanskarzz/k8sgptclient/pkg/probes"
-	"github.com/Sanskarzz/k8sgptclient/pkg/signals"
+	"github.com/Sanskarzz/k8sgptclient/k8s-agent/pkg/probes"
+	"github.com/Sanskarzz/k8sgptclient/k8s-agent/pkg/signals"
 	"github.com/spf13/cobra"
 	"go.uber.org/multierr"
 	"k8s.io/apimachinery/pkg/util/wait"

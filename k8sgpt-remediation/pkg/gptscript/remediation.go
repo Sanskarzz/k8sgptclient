@@ -2,6 +2,7 @@ package gptscript
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -59,12 +60,14 @@ Current YAML:
 Issues Detected:
 %s
 
-Analysis Details:
+Analysis Solution:
 %s
 
 Please only provide the corrected YAML.
 
-Format the response as valid Kubernetes YAML`,
+Format the response as valid Kubernetes YAML.
+
+Do not include any triple backticks and yaml word in the output. Just provide correct YAML`,
 		result.Kind, resourceYAML, errorMsgs, result.Details)
 
 	// Run GPTScript evaluation
@@ -89,7 +92,63 @@ Format the response as valid Kubernetes YAML`,
 	}
 
 	log.Printf("Successfully generated remediation YAML")
+
+	if err := r.applyRemediationYAML(ctx, remediationYAML); err != nil {
+		log.Printf("Failed to apply remediation YAML: %v", err)
+		return remediationYAML, fmt.Errorf("failed to apply remediation: %v", err)
+	}
+	log.Printf("Successfully applied remediation YAML") // Write remediation YAML to file
+
 	return remediationYAML, nil
+}
+
+func (r *RemediationGenerator) applyRemediationYAML(ctx context.Context, yaml string) error {
+	url := fmt.Sprintf("%s/apply", r.agentURL)
+
+	// Create request
+	req, err := http.NewRequestWithContext(ctx, "POST", url, strings.NewReader(yaml))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %v", err)
+	}
+
+	// Set headers
+	req.Header.Set("Content-Type", "application/yaml")
+
+	// Send request
+	log.Printf("Sending apply request to: %s", url)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Read response
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response: %v", err)
+	}
+
+	// Check response status
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("apply failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	// Parse response
+	var applyResp struct {
+		Kind      string `json:"kind"`
+		Name      string `json:"name"`
+		Namespace string `json:"namespace"`
+		Action    string `json:"action"`
+	}
+
+	if err := json.Unmarshal(body, &applyResp); err != nil {
+		return fmt.Errorf("failed to parse response: %v", err)
+	}
+
+	log.Printf("Apply response: Kind=%s, Name=%s/%s, Action=%s",
+		applyResp.Kind, applyResp.Namespace, applyResp.Name, applyResp.Action)
+
+	return nil
 }
 
 func (r *RemediationGenerator) getResourceYAML(result common.Result) (string, error) {
