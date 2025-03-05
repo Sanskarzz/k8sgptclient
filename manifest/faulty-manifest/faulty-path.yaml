@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: faulty-path
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: faulty-app
+  template:
+    metadata:
+      labels:
+        app: faulty-app
+    spec:
+      containers:
+        - name: faulty-container
+          image: busybox:latest
+          command: ["/bin/doesnotexist", "-c", "sleep 1000"]  

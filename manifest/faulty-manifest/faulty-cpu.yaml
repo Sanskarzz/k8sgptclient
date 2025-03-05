@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: faulty-cpu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: faulty-app
+  template:
+    metadata:
+      labels:
+        app: faulty-app
+    spec:
+      containers:
+        - name: faulty-container
+          image: nginx
+          resources:
+            requests:
+              cpu: "100"  

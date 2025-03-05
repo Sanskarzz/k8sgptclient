@@ -272,10 +272,13 @@ func (r *RemediationGenerator) waitForDeploymentPods(ctx context.Context, namesp
 			allPodsReady := true
 			for _, podName := range deployPods.PodNames {
 				if err := r.waitForPod(ctx, namespace, podName); err != nil {
-					log.Printf("Pod %s not ready: %v", podName, err)
-					allPodsReady = false
-					break
+					// If pod check fails, log and continue checking other pods
+					log.Printf("Pod %s status check failed: %v", podName, err)
+					continue
 				}
+				// If pod is ready, we can return success
+				log.Printf("Pod %s is ready", podName)
+				return nil
 			}
 
 			if allPodsReady {
@@ -334,7 +337,7 @@ func (r *RemediationGenerator) waitForPod(ctx context.Context, namespace, podNam
 						container.State.Waiting.Message)
 				}
 			}
-			log.Printf("Pod %s is still pending, waiting...", podName)
+			//log.Printf("Pod %s is still pending, waiting...", podName)
 
 			// If pod is running and all containers are ready, we're done
 			if status.Phase == "Running" {
