@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: remediation-server
   namespace: k8sgptclient
+  labels:
+    app: remediation-server
 spec:
   replicas: 1
   selector:
