@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -179,7 +179,7 @@ func (r *RemediationGenerator) applyRemediationYAML(ctx context.Context, yaml st
 	defer resp.Body.Close()
 
 	// Read response
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read response: %v", err)
 	}
@@ -251,7 +251,7 @@ func (r *RemediationGenerator) waitForDeploymentPods(ctx context.Context, namesp
 				PodNames  []string `json:"podNames"`
 			}
 
-			body, err := ioutil.ReadAll(resp.Body)
+			body, err := io.ReadAll(resp.Body)
 			resp.Body.Close()
 			if err != nil {
 				log.Printf("Error reading response: %v", err)
@@ -310,7 +310,7 @@ func (r *RemediationGenerator) waitForPod(ctx context.Context, namespace, podNam
 				continue
 			}
 
-			body, err := ioutil.ReadAll(resp.Body)
+			body, err := io.ReadAll(resp.Body)
 			resp.Body.Close()
 			if err != nil {
 				log.Printf("Error reading pod status: %v", err)
@@ -405,7 +405,7 @@ func (r *RemediationGenerator) getResourceYAML(result common.Result) (string, er
 		return "", fmt.Errorf("agent returned status %d", resp.StatusCode)
 	}
 
-	yaml, err := ioutil.ReadAll(resp.Body)
+	yaml, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Error reading agent response: %v", err)
 		return "", fmt.Errorf("failed to read agent response: %v", err)
