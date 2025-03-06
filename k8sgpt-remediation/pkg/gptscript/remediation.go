@@ -12,6 +12,7 @@ import (
 
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/k8sgpt-ai/k8sgpt/pkg/common"
+	corev1 "k8s.io/api/core/v1"
 )
 
 type RemediationGenerator struct {
@@ -20,58 +21,67 @@ type RemediationGenerator struct {
 }
 
 type PodStatus struct {
-	Name            string            `json:"name"`
-	Namespace       string            `json:"namespace"`
-	Phase           string            `json:"phase"`
-	Conditions      []PodCondition    `json:"conditions"`
-	ContainerStatus []ContainerStatus `json:"containerStatus"`
-	StartTime       string            `json:"startTime"`
-	PodIP           string            `json:"podIP"`
-	HostIP          string            `json:"hostIP"`
-	ProbeResults    []ProbeResult     `json:"probeResults"`
+	Name            string                   `json:"name"`
+	Namespace       string                   `json:"namespace"`
+	Phase           corev1.PodPhase          `json:"phase"`
+	Conditions      []corev1.PodCondition    `json:"conditions"`
+	ContainerStatus []corev1.ContainerStatus `json:"containerStatus"`
+	StartTime       string                   `json:"startTime,omitempty"`
+	PodIP           string                   `json:"podIP,omitempty"`
+	HostIP          string                   `json:"hostIP,omitempty"`
+	ProbeResults    []ContainerProbes        `json:"probeResults,omitempty"`
 }
 
-type PodCondition struct {
-	Type               string `json:"type"`
-	Status             string `json:"status"`
-	LastProbeTime      string `json:"lastProbeTime"`
-	LastTransitionTime string `json:"lastTransitionTime"`
-	Reason             string `json:"reason,omitempty"`
-	Message            string `json:"message,omitempty"`
-}
-
-type ContainerStatus struct {
-	Name         string `json:"name"`
-	State        State  `json:"state"`
-	LastState    State  `json:"lastState"`
-	Ready        bool   `json:"ready"`
-	RestartCount int32  `json:"restartCount"`
-	Image        string `json:"image"`
-	ImageID      string `json:"imageID"`
-	Started      bool   `json:"started"`
-}
-
-type State struct {
-	Waiting *WaitingState `json:"waiting,omitempty"`
-}
-
-type WaitingState struct {
-	Reason  string `json:"reason"`
-	Message string `json:"message"`
-}
-
-type ProbeResult struct {
+type ContainerProbes struct {
 	ContainerName string      `json:"containerName"`
-	Liveness      ProbeStatus `json:"liveness"`
-	Readiness     ProbeStatus `json:"readiness"`
+	Liveness      ProbeStatus `json:"liveness,omitempty"`
+	Readiness     ProbeStatus `json:"readiness,omitempty"`
 }
 
 type ProbeStatus struct {
-	Status       bool   `json:"status"`
-	SuccessCount int32  `json:"successCount"`
-	FailureCount int32  `json:"failureCount"`
-	Details      string `json:"details"`
+	LastProbeTime      string `json:"lastProbeTime,omitempty"`
+	LastTransitionTime string `json:"lastTransitionTime,omitempty"`
+	Status             bool   `json:"status"`
+	Failure            string `json:"failure,omitempty"`
+	SuccessCount       int32  `json:"successCount"`
+	FailureCount       int32  `json:"failureCount"`
+	Details            string `json:"details"`
 }
+
+// type PodCondition struct {
+// 	Type               string `json:"type"`
+// 	Status             string `json:"status"`
+// 	LastProbeTime      string `json:"lastProbeTime"`
+// 	LastTransitionTime string `json:"lastTransitionTime"`
+// 	Reason             string `json:"reason,omitempty"`
+// 	Message            string `json:"message,omitempty"`
+// }
+
+// type ContainerStatus struct {
+// 	Name         string `json:"name"`
+// 	State        State  `json:"state"`
+// 	LastState    State  `json:"lastState"`
+// 	Ready        bool   `json:"ready"`
+// 	RestartCount int32  `json:"restartCount"`
+// 	Image        string `json:"image"`
+// 	ImageID      string `json:"imageID"`
+// 	Started      bool   `json:"started"`
+// }
+
+// type State struct {
+// 	Waiting *WaitingState `json:"waiting,omitempty"`
+// }
+
+// type WaitingState struct {
+// 	Reason  string `json:"reason"`
+// 	Message string `json:"message"`
+// }
+
+// type ProbeResult struct {
+// 	ContainerName string      `json:"containerName"`
+// 	Liveness      ProbeStatus `json:"liveness"`
+// 	Readiness     ProbeStatus `json:"readiness"`
+// }
 
 func NewRemediationGenerator(apiKey string, agentURL string) (*RemediationGenerator, error) {
 	log.Printf("Initializing RemediationGenerator with agent URL: %s", agentURL)
@@ -319,7 +329,7 @@ func (r *RemediationGenerator) waitForPod(ctx context.Context, namespace, podNam
 
 			var status PodStatus
 			if err := json.Unmarshal(body, &status); err != nil {
-				log.Printf("Error parsing pod status: %v", err)
+				log.Printf("Error parsing pod status: %v, body: %s", err, string(body))
 				continue
 			}
 
@@ -337,10 +347,9 @@ func (r *RemediationGenerator) waitForPod(ctx context.Context, namespace, podNam
 						container.State.Waiting.Message)
 				}
 			}
-			//log.Printf("Pod %s is still pending, waiting...", podName)
 
 			// If pod is running and all containers are ready, we're done
-			if status.Phase == "Running" {
+			if status.Phase == corev1.PodRunning {
 				allContainersReady := true
 				for _, container := range status.ContainerStatus {
 					if !container.Ready {
@@ -355,7 +364,7 @@ func (r *RemediationGenerator) waitForPod(ctx context.Context, namespace, podNam
 			}
 
 			// If pod is in a terminal failed state, return error
-			if status.Phase == "Failed" {
+			if status.Phase == corev1.PodFailed {
 				return fmt.Errorf("pod failed: %s", status.Phase)
 			}
 
