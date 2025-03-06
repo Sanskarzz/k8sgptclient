@@ -1,0 +1,108 @@
+# name: Security Scan
+
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+#   schedule:
+#     - cron: '0 0 * * *'  # Run daily at midnight
+
+# jobs:
+#   k8s-agent-scan:
+#     name: Scan K8s Agent
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: read
+#       security-events: write
+      
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Build image
+#         run: docker build -t sanskardevops/k8s-agent:${{ github.sha }} ./k8s-agent
+
+#       - name: Run Trivy vulnerability scanner
+#         uses: aquasecurity/trivy-action@master
+#         with:
+#           image-ref: sanskardevops/k8s-agent:${{ github.sha }}
+#           format: 'sarif'
+#           output: 'trivy-k8s-agent-results.sarif'
+#           severity: 'CRITICAL,HIGH'
+#           ignore-unfixed: true
+#           scanners: vuln,secret,config
+
+#       - name: Run Trivy filesystem scan
+#         uses: aquasecurity/trivy-action@master
+#         with:
+#           scan-type: 'fs'
+#           scan-ref: './k8s-agent'
+#           format: 'sarif'
+#           output: 'trivy-k8s-agent-fs-results.sarif'
+#           severity: 'CRITICAL,HIGH'
+#           ignore-unfixed: true
+#           scanners: vuln,secret,config
+
+#       - name: Upload Trivy scan results to GitHub Security tab
+#         uses: github/codeql-action/upload-sarif@v3
+#         if: always()
+#         with:
+#           sarif_file: 'trivy-k8s-agent-results.sarif'
+#           category: k8s-agent-container
+
+#       - name: Upload Trivy fs scan results to GitHub Security tab
+#         uses: github/codeql-action/upload-sarif@v3
+#         if: always()
+#         with:
+#           sarif_file: 'trivy-k8s-agent-fs-results.sarif'
+#           category: k8s-agent-fs
+
+#   remediation-scan:
+#     name: Scan Remediation Service
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: read
+#       security-events: write
+      
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Build image
+#         run: docker build -t sanskardevops/k8sgpt-remediation:${{ github.sha }} ./k8sgpt-remediation
+
+#       - name: Run Trivy vulnerability scanner
+#         uses: aquasecurity/trivy-action@master
+#         with:
+#           image-ref: sanskardevops/k8sgpt-remediation:${{ github.sha }}
+#           format: 'sarif'
+#           output: 'trivy-remediation-results.sarif'
+#           severity: 'CRITICAL,HIGH'
+#           ignore-unfixed: true
+#           scanners: vuln,secret,config
+
+#       - name: Run Trivy filesystem scan
+#         uses: aquasecurity/trivy-action@master
+#         with:
+#           scan-type: 'fs'
+#           scan-ref: './k8sgpt-remediation'
+#           format: 'sarif'
+#           output: 'trivy-remediation-fs-results.sarif'
+#           severity: 'CRITICAL,HIGH'
+#           ignore-unfixed: true
+#           scanners: vuln,secret,config
+
+#       - name: Upload Trivy scan results to GitHub Security tab
+#         uses: github/codeql-action/upload-sarif@v3
+#         if: always()
+#         with:
+#           sarif_file: 'trivy-remediation-results.sarif'
+#           category: remediation-container
+
+#       - name: Upload Trivy fs scan results to GitHub Security tab
+#         uses: github/codeql-action/upload-sarif@v3
+#         if: always()
+#         with:
+#           sarif_file: 'trivy-remediation-fs-results.sarif'
+#           category: remediation-fs
