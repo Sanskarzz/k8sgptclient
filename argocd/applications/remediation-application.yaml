@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: git@github.com:Sanskarzz/k8sgptclient.git 
     targetRevision: main
-    path: manifest/k8sgptclient/remediation-server
+    path: manifest/k8sgptclient/remediation-server-resources
   destination:
     server: https://kubernetes.default.svc
     namespace: k8sgptclient
