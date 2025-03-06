@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-agent
+  namespace: k8sgptclient
+  labels:
+    app: k8s-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8s-agent
+  template:
+    metadata:
+      labels:
+        app: k8s-agent
+    spec:
+      serviceAccountName: k8s-agent
+      containers:
+      - name: k8s-agent
+        image: sanskardevops/k8s-agent:latest
+        command: ["./k8s-agent"]
+        args: ["serve", "agent", "--http-address=:8080"]
+        ports:
+        - containerPort: 8080
+        

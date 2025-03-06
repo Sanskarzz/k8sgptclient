@@ -9,7 +9,7 @@ data:
       providers:
         - name: openai
           model: gpt-4o-mini
-          password: 
+          password: sk-svcacct-lW46NWHoGRUnxK8NsscMwp49VHJhWXJoLc6D7580wzzxN81BjzBVB_lHSjWvU9_tvJWx5lT3BlbkFJRHk4dJlm6wyqALdKlkwfDJVresulD3VTvBJQO0FmCKZRMtoFU4oP9yPWEV5n8C8BucAQEA
           temperature: 0.7
           topp: 0.5
           topk: 50
