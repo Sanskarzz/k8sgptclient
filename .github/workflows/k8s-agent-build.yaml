@@ -1,4 +1,4 @@
-name: Build and Push
+name: K8s Agent Build and Push
 
 on:
   push:
@@ -9,9 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [k8s-agent, k8sgpt-remediation]
 
     steps:
     - name: Checkout code
@@ -24,7 +21,7 @@ jobs:
         cache: true
 
     - name: Build and Test
-      working-directory: ./${{ matrix.service }}
+      working-directory: ./k8s-agent
       run: |
         go mod download
         go build -v ./...
@@ -43,8 +40,8 @@ jobs:
     - name: Build and Push Docker image
       uses: docker/build-push-action@v5
       with:
-        context: ./${{ matrix.service }}
+        context: ./k8s-agent
         push: ${{ github.event_name != 'pull_request' }}
-        tags: sanskardevops/${{ matrix.service }}:latest
+        tags: sanskardevops/k8s-agent:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
