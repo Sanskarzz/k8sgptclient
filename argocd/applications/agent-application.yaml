@@ -4,8 +4,10 @@ metadata:
   name: k8sgptclient-agent
   namespace: argocd
   annotations:
-    argocd-image-updater.argoproj.io/image-list: k8s-agent=sanskardevops/k8s-agent:latest
-    argocd-image-updater.argoproj.io/k8s-agent.update-strategy: newest-build
+    argocd-image-updater.argoproj.io/image-list: k8s-agent=sanskardevops/k8s-agent:1.0.0
+    argocd-image-updater.argoproj.io/k8s-agent.update-strategy: semver
+    argocd-image-updater.argoproj.io/k8s-agent.allow-tags: regexp:^[0-9]+\.[0-9]+\.[0-9]+$
+    argocd-image-updater.argoproj.io/k8s-agent.pull-secret: pullsecret:argocd/dockerhub-secret
 spec:
   project: default
   source:
