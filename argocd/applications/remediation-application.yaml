@@ -9,7 +9,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/Sanskarzz/k8sgptclient.git  
+    repoURL: git@github.com:Sanskarzz/k8sgptclient.git 
     targetRevision: main
     path: manifest/k8sgptclient/remediation-server
   destination:
