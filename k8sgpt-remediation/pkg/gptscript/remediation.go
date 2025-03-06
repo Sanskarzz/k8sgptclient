@@ -327,6 +327,13 @@ func (r *RemediationGenerator) waitForPod(ctx context.Context, namespace, podNam
 				continue
 			}
 
+			// Check if response is an error message
+			if strings.HasPrefix(string(body), "Failed to get pod") {
+				log.Printf("Pod not found yet, waiting... Details: %s", string(body))
+				// Don't treat this as an error, just continue waiting
+				continue
+			}
+
 			var status PodStatus
 			if err := json.Unmarshal(body, &status); err != nil {
 				log.Printf("Error parsing pod status: %v, body: %s", err, string(body))
