@@ -18,7 +18,7 @@ spec:
       serviceAccountName: remediation-server 
       containers:
       - name: k8sgpt-remediation
-        image: sanskardevops/k8sgpt-remediation:1.0.0
+        image: registry.hub.docker.com/sanskardevops/k8sgpt-remediation:1.0.0
         command: ["/bin/sh", "-c"]
         args: 
         - >
