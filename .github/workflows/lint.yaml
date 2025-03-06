@@ -1,0 +1,48 @@
+name: Lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-k8s-agent:
+    name: Lint K8s Agent
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ./k8s-agent/go.mod
+          cache-dependency-path: ./k8s-agent/go.sum
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          skip-cache: true
+          working-directory: ./k8s-agent
+          args: --timeout=5m
+
+  lint-remediation:
+    name: Lint Remediation
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ./k8sgpt-remediation/go.mod
+          cache-dependency-path: ./k8sgpt-remediation/go.sum
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          skip-cache: true
+          working-directory: ./k8sgpt-remediation
+          args: --timeout=5m

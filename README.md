@@ -56,18 +56,19 @@ A service that:
    - Kind Cluster
 - kubectl CLI
 
-### Create Kind Cluster
+### Usage
+#### Create Kind Cluster
 
 ```bash
 kind create cluster --name k8sgptclient
 ```
 
-### Create a namespace for k8sgptclient
+#### Create a namespace for k8sgptclient
 ```bash
 kubectl create namespace k8sgptclient
 ```
 
-### Install K8s Agent
+#### Install K8s Agent
 ```bash
 kubectl create -k manifest/k8sgptclient/agent-resources/
 ```
@@ -85,20 +86,20 @@ resources:
   - namespace.yaml
 ```
 
-### Configure Remediation Server
+#### Configure Remediation Server
 
-#### Create a secret for the remediation server
+##### Create a secret for the remediation server
 
 ```bash
 kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=<your-openai-api-key> -n k8sgptclient
 ```
-#### Verify the secret
+##### Verify the secret
 
 ```bash
 kubectl get secrets -n k8sgptclient k8sgpt-sample-secret -o yaml
 ```
 
-#### Create a configmap for the remediation server perticulerly for K8sGPT
+##### Create a configmap for the remediation server perticulerly for K8sGPT
 
 ```yaml
 # configmap.yaml
@@ -135,17 +136,17 @@ resources:
   - configmap.yaml ## Pass configmap.yaml 
 ```
 
-### Install Remediation Server
+#### Install Remediation Server
 ```bash
 kubectl create -k manifest/k8sgptclient/remediation-server-resources/
 ```
 
-### Verify the installation
+#### Verify the installation
 ```bash
 kubectl get all -n k8sgptclient
 ```
 
-### Create faulty deployment
+#### Create faulty deployment
 
 Create a faulty deployment to test the remediation server
 ```bash
@@ -159,7 +160,7 @@ Check the status which should be in not ready state and pods are not ready for f
 kubectl get all 
 ```
 
-### Monitor logs of remediation server and k8s-agent
+#### Monitor logs of remediation server and k8s-agent
 
 Check logs of remediation server in different terminal
 ```bash
@@ -170,14 +171,14 @@ Check logs of k8s-agent in different terminal
 kubectl -n k8sgptclient logs deployments/k8s-agent -f
 ```
 
-### Verify the remediation of the deployment
+#### Verify the remediation of the deployment
 
 Check the status of the faulty deployment which should be in ready state
 ```bash
 kubectl get all 
 ```
 
-### Create a faulty pod
+#### Create a faulty pod
 
 Create a faulty pod to test the remediation server
 ```bash
@@ -190,7 +191,7 @@ Check the status which should be in not ready state and pods are not ready for f
 kubectl get all 
 ```
 
-### Monitor logs of remediation server and k8s-agent
+#### Monitor logs of remediation server and k8s-agent
 
 Check logs of remediation server in different terminal
 ```bash
@@ -201,7 +202,7 @@ Check logs of k8s-agent in different terminal
 kubectl -n k8sgptclient logs deployments/k8s-agent -f
 ```
 
-### Verify the remediation of the pod
+#### Verify the remediation of the pod
 
 Check the status of the faulty pod which should be in ready state
 ```bash
