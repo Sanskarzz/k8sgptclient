@@ -3,11 +3,14 @@ kind: Application
 metadata:
   name: k8sgptclient-remediation
   namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: remediation=sanskardevops/k8sgpt-remediation:latest
+    argocd-image-updater.argoproj.io/remediation.update-strategy: latest
 spec:
   project: default
   source:
     repoURL: https://github.com/Sanskarzz/k8sgptclient.git  
-    targetRevision: HEAD
+    targetRevision: main
     path: manifest/k8sgptclient/remediation-server
   destination:
     server: https://kubernetes.default.svc

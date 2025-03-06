@@ -3,11 +3,14 @@ kind: Application
 metadata:
   name: k8sgptclient-agent
   namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: k8s-agent=sanskardevops/k8s-agent:latest
+    argocd-image-updater.argoproj.io/k8s-agent.update-strategy: latest
 spec:
   project: default
   source:
     repoURL: https://github.com/Sanskarzz/k8sgptclient.git  
-    targetRevision: HEAD
+    targetRevision: main
     path: manifest/k8sgptclient/agent-resources
   destination:
     server: https://kubernetes.default.svc
