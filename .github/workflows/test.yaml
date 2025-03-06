@@ -1,0 +1,60 @@
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-k8s-agent:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
+        cache: true
+
+    - name: Run Tests with Coverage
+      working-directory: ./k8s-agent
+      run: |
+        go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./k8s-agent/coverage.txt
+        flags: k8s-agent
+        name: k8s-agent-coverage
+        fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+  test-remediation:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
+        cache: true
+
+    - name: Run Tests with Coverage
+      working-directory: ./k8sgpt-remediation
+      run: |
+        go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./k8sgpt-remediation/coverage.txt
+        flags: k8sgpt-remediation
+        name: remediation-coverage
+        fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}
