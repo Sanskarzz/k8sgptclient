@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
   annotations:
     argocd-image-updater.argoproj.io/image-list: k8s-agent=sanskardevops/k8s-agent:latest
-    argocd-image-updater.argoproj.io/k8s-agent.update-strategy: latest
+    argocd-image-updater.argoproj.io/k8s-agent.update-strategy: newest-build
 spec:
   project: default
   source:
